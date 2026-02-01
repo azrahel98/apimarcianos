@@ -1,27 +1,15 @@
-import { TLSMode } from 'https://deno.land/x/mysql@v2.12.1/src/client.ts';
-import { Client } from 'mysql';
+import { drizzle } from 'drizzle-orm/mysql2';
+import mysql from 'mysql2/promise';
+import * as schema from './schemas.ts';
 
-export class Database {
-  private static instance: Client;
+const connection = await mysql.createConnection({
+  host: Deno.env.get('DB_HOST') || 'localhost',
+  user: Deno.env.get('DB_USER') || 'root',
+  password: Deno.env.get('DB_PASS') || 'password',
+  database: 'test',
+  ssl: {
+    ca: Deno.env.get('CAT_KEY') || '',
+  },
+});
 
-  private constructor() {}
-
-  public static async getInstance(): Promise<Client> {
-    if (!Database.instance) {
-      console.log('Creando nueva conexión a MySQL...');
-      Database.instance = await new Client().connect({
-        hostname: Deno.env.get('DB_HOST') || 'localhost',
-        username: Deno.env.get('DB_USER') || 'root',
-        db: 'test',
-        password: Deno.env.get('DB_PASS') || 'password',
-        poolSize: 10,
-        port: 4000,
-        tls: {
-          mode: TLSMode.VERIFY_IDENTITY,
-          caCerts: [Deno.env.get('CAT_KEY') || ''],
-        },
-      });
-    }
-    return Database.instance;
-  }
-}
+export const db = drizzle(connection, { schema, mode: 'default' });
