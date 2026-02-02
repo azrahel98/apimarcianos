@@ -5,11 +5,33 @@ content-type: application/json
 
 
 ####
-POST https://azrahel98-apimarciano-58-er9nxgsh4xgb.deno.dev/login
+POST http://localhost:8000/login
 content-type: application/json
 
 {
     "email":"azraelraul@gmail.com",
-    "contrasena": "Jds"
+    "contrasena": "unodostres"
 }
 
+
+####
+GET http://localhost:8000/cliente?id=2
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJSYXVsIFNtaXRoIENoZXJjY2EgTG9wZXoiLCJyb2wiOiJhZG1pbiIsImV4cCI6MTc3MDA2MjQ0M30.PVrW3up-9krwjzyDNyP6J7-k9UePUb5EqlN2A7CVRGo
+
+
+####
+POST http://localhost:8000/cliente/canjear
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJSYXVsIFNtaXRoIENoZXJjY2EgTG9wZXoiLCJyb2wiOiJhZG1pbiIsImV4cCI6MTc3MDA2MjQ0M30.PVrW3up-9krwjzyDNyP6J7-k9UePUb5EqlN2A7CVRGo
+
+{
+    "id": 2,
+    "id_sabor_elegido": 1
+}
+
+
+####
+GET http://localhost:8000/sabor
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJSYXVsIFNtaXRoIENoZXJjY2EgTG9wZXoiLCJyb2wiOiJhZG1pbiIsImV4cCI6MTc3MDA2MjQ0M30.PVrW3up-9krwjzyDNyP6J7-k9UePUb5EqlN2A7CVRGo
