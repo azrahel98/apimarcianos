@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { db } from '../db/mysql.ts';
 import { z } from 'zod';
 import { zValidator } from './error.ts';
-import { users } from '../db/schemas.ts';
+import { usuarios } from '../db/schemas.ts';
 import { eq } from 'drizzle-orm';
 import { sign } from 'hono/jwt';
 
@@ -21,8 +21,8 @@ login.post('/', zValidator('json', UserSchema), async c => {
   const body = c.req.valid('json') as z.infer<typeof UserSchema>;
   const res = await db
     .select()
-    .from(users)
-    .where(eq(users.correo, body.email))
+    .from(usuarios)
+    .where(eq(usuarios.correo, body.email))
     .limit(1);
 
   if (!res[0]) return c.json({ message: 'Usuario no encontrado' }, 401);

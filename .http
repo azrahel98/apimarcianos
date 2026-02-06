@@ -9,21 +9,21 @@ POST http://localhost:8000/login
 content-type: application/json
 
 {
-    "email":"azraelraul@gmail.com",
-    "contrasena": "unodostres"
+    "email":"admin@heladeria.com",
+    "contrasena": "admin123"
 }
 
 
 ####
-GET http://localhost:8000/cliente?id=2
+GET http://localhost:8000/sabor
 content-type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJSYXVsIFNtaXRoIENoZXJjY2EgTG9wZXoiLCJyb2wiOiJhZG1pbiIsImV4cCI6MTc3MDA2MjQ0M30.PVrW3up-9krwjzyDNyP6J7-k9UePUb5EqlN2A7CVRGo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJBZG1pbiBHZW5lcmFsIiwicm9sIjoiYWRtaW4iLCJleHAiOjE3NzA0ODQ3NTl9.Zi18C-y2dOQcyz9kdHvDCWYwVaxOyFCBQK78udKXyTI
 
 
 ####
-POST http://localhost:8000/cliente/canjear
+GET http://localhost:8000/cliente/historial/2
 content-type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJSYXVsIFNtaXRoIENoZXJjY2EgTG9wZXoiLCJyb2wiOiJhZG1pbiIsImV4cCI6MTc3MDA2MjQ0M30.PVrW3up-9krwjzyDNyP6J7-k9UePUb5EqlN2A7CVRGo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJBZG1pbiBHZW5lcmFsIiwicm9sIjoiYWRtaW4iLCJleHAiOjE3NzA0ODQ3NTl9.Zi18C-y2dOQcyz9kdHvDCWYwVaxOyFCBQK78udKXyTI
 
 {
     "id": 2,
@@ -32,6 +32,22 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxL
 
 
 ####
-GET http://localhost:8000/sabor
+POST http://localhost:8000/cliente/canjear
 content-type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJSYXVsIFNtaXRoIENoZXJjY2EgTG9wZXoiLCJyb2wiOiJhZG1pbiIsImV4cCI6MTc3MDA2MjQ0M30.PVrW3up-9krwjzyDNyP6J7-k9UePUb5EqlN2A7CVRGo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJBZG1pbiBHZW5lcmFsIiwicm9sIjoiYWRtaW4iLCJleHAiOjE3NzA0ODQ3NTl9.Zi18C-y2dOQcyz9kdHvDCWYwVaxOyFCBQK78udKXyTI
+
+{
+    "userId": 2,
+    "idSabor": 1
+}
+
+
+####
+PATCH  http://localhost:8000/cliente/estado
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJub21icmUiOiJBZG1pbiBHZW5lcmFsIiwicm9sIjoiYWRtaW4iLCJleHAiOjE3NzA0ODQ3NTl9.Zi18C-y2dOQcyz9kdHvDCWYwVaxOyFCBQK78udKXyTI
+
+{
+    "id_pedido": 2,
+    "nuevoEstado": "completado"
+}
