@@ -8,6 +8,6 @@ RUN deno cache main.ts || true
 
 COPY . .
 
-EXPOSE 8000
+EXPOSE 8080
 
 CMD ["run", "--allow-net", "--allow-env", "--env", "main.ts"]
