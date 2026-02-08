@@ -21,7 +21,7 @@ const port = Number(Deno.env.get('PORT') ?? 8080);
 
 try {
   await db.execute(sql`SELECT 1`);
-  console.log('✅ Conexión a DB establecida y lista');
+  console.log('✅ Conexión a DB establecida y lista todo bien');
 } catch (error) {
   console.error('❌ Error al conectar a la DB:', error);
 }
