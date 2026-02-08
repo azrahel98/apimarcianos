@@ -17,7 +17,7 @@ app.route('/login', login);
 app.route('/cliente', cliente);
 app.route('/sabor', sabor);
 
-const port = Number(Deno.env.get('PORT') ?? 8000);
+const port = Number(Deno.env.get('PORT') ?? 8080);
 
 try {
   await db.execute(sql`SELECT 1`);
