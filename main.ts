@@ -9,11 +9,14 @@ import sabor from './routes/sabores.ts';
 const app = new Hono();
 
 app.use(logger());
-
 app.use('/*', cors());
 
 app.route('/login', login);
 app.route('/cliente', cliente);
 app.route('/sabor', sabor);
 
-Deno.serve(app.fetch);
+const port = Number(Deno.env.get('PORT') ?? 8000);
+
+console.log(`🚀 API corriendo en puerto ${port}`);
+
+Deno.serve({ port }, app.fetch);
