@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
 import * as schema from './schemas.ts';
+import { any } from 'zod';
 
 // 1. Creamos el Pool en lugar de una conexión única
 const poolConnection = mysql.createPool({
@@ -19,5 +20,13 @@ const poolConnection = mysql.createPool({
   keepAliveInitialDelay: 10000, // Empieza tras 10 segundos de inactividad
 });
 
-// 3. Exportamos la instancia de Drizzle usando el pool
+// 3. Manejo de errores del pool
+// deno-lint-ignore no-explicit-any
+poolConnection.on('connection', (conn: any) => {
+  conn.on('error', (err: any) => {
+    console.error('⚠️ Error inesperado en el pool de conexiones:', err);
+  });
+});
+
+// 4. Exportamos la instancia de Drizzle usando el pool
 export const db = drizzle(poolConnection, { schema, mode: 'default' });
