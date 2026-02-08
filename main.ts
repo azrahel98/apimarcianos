@@ -5,6 +5,8 @@ import { logger } from 'hono/logger';
 import login from './routes/login.ts';
 import cliente from './routes/cliente.ts';
 import sabor from './routes/sabores.ts';
+import { db } from './db/mysql.ts';
+import { sql } from 'drizzle-orm';
 
 const app = new Hono();
 
@@ -16,6 +18,13 @@ app.route('/cliente', cliente);
 app.route('/sabor', sabor);
 
 const port = Number(Deno.env.get('PORT') ?? 8000);
+
+try {
+  await db.execute(sql`SELECT 1`);
+  console.log('✅ Conexión a DB establecida y lista');
+} catch (error) {
+  console.error('❌ Error al conectar a la DB:', error);
+}
 
 console.log(`🚀 API corriendo en puerto ${port}`);
 

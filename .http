@@ -5,7 +5,7 @@ content-type: application/json
 
 
 ####
-POST http://localhost:8000/login
+POST https://api.odeploy.work/login
 content-type: application/json
 
 {
