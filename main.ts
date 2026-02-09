@@ -28,4 +28,6 @@ try {
 
 console.log(`🚀 API corriendo en puerto ${port}`);
 
-Deno.serve({ port }, app.fetch);
+Deno.serve({ port: 8080, hostname: '0.0.0.0' }, req => {
+  return app.fetch(req);
+});
