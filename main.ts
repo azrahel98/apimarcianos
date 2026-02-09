@@ -5,6 +5,7 @@ import { logger } from 'hono/logger';
 import login from './routes/login.ts';
 import cliente from './routes/cliente.ts';
 import sabor from './routes/sabores.ts';
+import pedidos from './routes/pedidos.ts';
 import { db } from './db/mysql.ts';
 import { sql } from 'drizzle-orm';
 
@@ -16,6 +17,7 @@ app.use('/*', cors());
 app.route('/login', login);
 app.route('/cliente', cliente);
 app.route('/sabor', sabor);
+app.route('/pedidos', pedidos);
 
 const port = Number(Deno.env.get('PORT') ?? 8080);
 
