@@ -15,18 +15,7 @@ const app = new Hono();
 
 app.use(logger());
 
-app.use(
-  '*',
-  cors({
-    origin: origin => {
-      return origin ?? '';
-    },
-    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
-app.get('/ws', c => handleWebSocket(c));
+app.use('/*', cors());
 
 app.route('/login', login);
 app.route('/registro', registro);
