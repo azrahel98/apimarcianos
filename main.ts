@@ -14,25 +14,8 @@ import { handleWebSocket } from './webscket/socket.ts';
 const app = new Hono();
 
 app.use(logger());
-app.use(
-  '/*',
-  cors({
-    origin: '*',
-    allowHeaders: ['Upgrade', 'Connection', 'Content-Type'],
-  })
-);
-
-app.all('/ws', c => {
-  console.log('Encabezado Upgrade:', c.req.header('upgrade'));
-
-  // Verificación menos estricta para entornos con proxy
-  if (c.req.header('upgrade')?.toLowerCase() !== 'websocket') {
-    return c.text('Upgrade Required', 426);
-  }
-
-  return handleWebSocket(c);
-});
-
+app.use('/*', cors());
+app.get('/ws', c => handleWebSocket(c));
 app.route('/login', login);
 app.route('/registro', registro);
 app.route('/cliente', cliente);
