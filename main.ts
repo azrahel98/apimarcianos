@@ -32,7 +32,10 @@ try {
 }
 
 console.log(`🚀 API corriendo en puerto ${port}`);
-app.get('/ws', c => handleWebSocket(c));
+app.all('/ws', c => {
+  console.log('Recepción de intento de conexión WS...'); // Log para ver en Dockploy
+  return handleWebSocket(c);
+});
 
 Deno.serve({ port: 8080, hostname: '0.0.0.0' }, req => {
   return app.fetch(req);
