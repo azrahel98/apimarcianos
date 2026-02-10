@@ -4,6 +4,7 @@ import { usuarios, pedidos, detalle_pedidos, sabores } from '../db/schemas.ts';
 import { eq, sql, desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { zValidator } from './error.ts'; // Asegúrate de que la ruta sea correcta
+import { notifyNewOrder } from '../webscket/socket.ts';
 
 const cliente = new Hono();
 
@@ -82,6 +83,8 @@ cliente.post('/comprar', zValidator('json', CompraSchema), async c => {
 
       return { pedidoId };
     });
+
+    notifyNewOrder(resultado);
 
     return c.json({ success: true, ...resultado });
   } catch (err: any) {

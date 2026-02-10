@@ -3,18 +3,21 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 
 import login from './routes/login.ts';
+import registro from './routes/registro.ts';
 import cliente from './routes/cliente.ts';
 import sabor from './routes/sabores.ts';
 import pedidos from './routes/pedidos.ts';
 import { db } from './db/mysql.ts';
 import { sql } from 'drizzle-orm';
+import { handleWebSocket } from './webscket/socket.ts';
 
 const app = new Hono();
 
 app.use(logger());
 app.use('/*', cors());
-
+app.get('/ws', c => handleWebSocket(c));
 app.route('/login', login);
+app.route('/registro', registro);
 app.route('/cliente', cliente);
 app.route('/sabor', sabor);
 app.route('/pedidos', pedidos);

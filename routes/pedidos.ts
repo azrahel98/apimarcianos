@@ -31,10 +31,6 @@ app.post('/movimiento', zValidator('json', MovimientoSchema), async c => {
         tipo: tipo,
       });
 
-      // 2. Actualizar stock
-      // Lógica: ingreso (+) venta (-) canje (-) ajuste (+) (asumiendo que ajuste es sumar/restar valor con signo si fuera necesario, o magnitud)
-      // Para simplificar: venta y canje RESTAN. Ingreso y Ajuste SUMAN (si ajuste es negativo, resta).
-
       let operacion = sql`+ ${cantidad}`;
       if (tipo === 'venta' || tipo === 'canje') {
         operacion = sql`- ${cantidad}`;
