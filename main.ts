@@ -14,20 +14,21 @@ import { handleWebSocket } from './webscket/socket.ts';
 const app = new Hono();
 
 app.use(logger());
+
 app.use(
   '*',
   cors({
-    origin: [
-      'https://odeploy.work',
-      'https://www.odeploy.work',
-      'https://app.odeploy.work',
-    ],
+    origin: 'https://odeploy.work', // usa SOLO el origen real del frontend
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowHeaders: [
+      'Content-Type',
+      'Authorization',
+      'authorization', // 🔥 ESTE ES EL CLAVE
+    ],
     credentials: true,
   })
 );
-app.get('/ws', c => handleWebSocket(c));
+
 app.route('/login', login);
 app.route('/registro', registro);
 app.route('/cliente', cliente);
@@ -36,6 +37,7 @@ app.route('/pedidos', pedidos);
 
 const port = Number(Deno.env.get('PORT') ?? 8080);
 
+app.get('/ws', c => handleWebSocket(c));
 try {
   await db.execute(sql`SELECT 1`);
   console.log('✅ Conexión a DB establecida y lista todo bien');
