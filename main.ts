@@ -18,7 +18,7 @@ app.use(
   '/*',
   cors({
     origin: '*',
-    allowHeaders: ['Upgrade', 'Connection'],
+    allowHeaders: ['Upgrade', 'Connection', 'Content-Type'],
   })
 );
 
@@ -38,11 +38,16 @@ try {
 }
 
 console.log(`🚀 API corriendo en puerto ${port}`);
-app.get('/ws', c => {
-  console.log('Intentando upgrade desde:', c.req.header('host'));
+app.all('/ws', c => {
+  console.log('Encabezado Upgrade:', c.req.header('upgrade'));
+
+  // Verificación menos estricta para entornos con proxy
+  if (c.req.header('upgrade')?.toLowerCase() !== 'websocket') {
+    return c.text('Upgrade Required', 426);
+  }
+
   return handleWebSocket(c);
 });
-
 Deno.serve({ port: 8080, hostname: '0.0.0.0' }, req => {
   return app.fetch(req);
 });
