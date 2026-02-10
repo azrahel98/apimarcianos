@@ -14,7 +14,19 @@ import { handleWebSocket } from './webscket/socket.ts';
 const app = new Hono();
 
 app.use(logger());
-app.use('/*', cors());
+app.use(
+  '*',
+  cors({
+    origin: [
+      'https://odeploy.work',
+      'https://www.odeploy.work',
+      'https://app.odeploy.work',
+    ],
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
 app.get('/ws', c => handleWebSocket(c));
 app.route('/login', login);
 app.route('/registro', registro);
