@@ -14,7 +14,13 @@ import { handleWebSocket } from './webscket/socket.ts';
 const app = new Hono();
 
 app.use(logger());
-app.use('/*', cors());
+app.use(
+  '/*',
+  cors({
+    origin: '*',
+    allowHeaders: ['Upgrade', 'Connection'],
+  })
+);
 
 app.route('/login', login);
 app.route('/registro', registro);
