@@ -15,19 +15,8 @@ const app = new Hono();
 
 app.use(logger());
 
-app.use(
-  '*',
-  cors({
-    origin: 'https://odeploy.work', // usa SOLO el origen real del frontend
-    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: [
-      'Content-Type',
-      'Authorization',
-      'authorization', // 🔥 ESTE ES EL CLAVE
-    ],
-    credentials: true,
-  })
-);
+app.use('/*', cors());
+app.get('/ws', c => handleWebSocket(c));
 
 app.route('/login', login);
 app.route('/registro', registro);
