@@ -15,7 +15,7 @@ const app = new Hono();
 
 app.use(logger());
 app.use('/*', cors());
-app.get('/ws', c => handleWebSocket(c));
+
 app.route('/login', login);
 app.route('/registro', registro);
 app.route('/cliente', cliente);
@@ -32,6 +32,7 @@ try {
 }
 
 console.log(`🚀 API corriendo en puerto ${port}`);
+app.get('/ws', c => handleWebSocket(c));
 
 Deno.serve({ port: 8080, hostname: '0.0.0.0' }, req => {
   return app.fetch(req);
