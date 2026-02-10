@@ -22,6 +22,17 @@ app.use(
   })
 );
 
+app.all('/ws', c => {
+  console.log('Encabezado Upgrade:', c.req.header('upgrade'));
+
+  // Verificación menos estricta para entornos con proxy
+  if (c.req.header('upgrade')?.toLowerCase() !== 'websocket') {
+    return c.text('Upgrade Required', 426);
+  }
+
+  return handleWebSocket(c);
+});
+
 app.route('/login', login);
 app.route('/registro', registro);
 app.route('/cliente', cliente);
@@ -38,16 +49,7 @@ try {
 }
 
 console.log(`🚀 API corriendo en puerto ${port}`);
-app.all('/ws', c => {
-  console.log('Encabezado Upgrade:', c.req.header('upgrade'));
 
-  // Verificación menos estricta para entornos con proxy
-  if (c.req.header('upgrade')?.toLowerCase() !== 'websocket') {
-    return c.text('Upgrade Required', 426);
-  }
-
-  return handleWebSocket(c);
-});
 Deno.serve({ port: 8080, hostname: '0.0.0.0' }, req => {
   return app.fetch(req);
 });
