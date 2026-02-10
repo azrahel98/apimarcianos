@@ -38,8 +38,8 @@ try {
 }
 
 console.log(`🚀 API corriendo en puerto ${port}`);
-app.all('/ws', c => {
-  console.log('Recepción de intento de conexión WS...'); // Log para ver en Dockploy
+app.get('/ws', c => {
+  console.log('Intentando upgrade desde:', c.req.header('host'));
   return handleWebSocket(c);
 });
 
