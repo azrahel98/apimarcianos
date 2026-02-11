@@ -3,12 +3,10 @@ import { db } from '../db/mysql.ts';
 import { usuarios, pedidos, detalle_pedidos, sabores } from '../db/schemas.ts';
 import { eq, sql, desc } from 'drizzle-orm';
 import { z } from 'zod';
-import { zValidator } from './error.ts'; // Asegúrate de que la ruta sea correcta
+import { zValidator } from './error.ts';
 import { notifyNewOrder } from '../webscket/socket.ts';
 
 const cliente = new Hono();
-
-// --- Esquemas de Validación ---
 
 const CompraSchema = z.object({
   userId: z.number(),
@@ -36,18 +34,11 @@ const CambioEstadoSchema = z.object({
   ]),
 });
 
-// --- Endpoints ---
-
-/**
- * POST /comprar
- * Suma puntos según la CANTIDAD de unidades compradas.
- */
 cliente.post('/comprar', zValidator('json', CompraSchema), async c => {
   const { userId, productos } = c.req.valid('json');
 
   try {
     const resultado = await db.transaction(async tx => {
-      // 1. Crear cabecera (Estado inicial: pendiente)
       const [nuevoPedido] = await tx.insert(pedidos).values({
         id_usuario: userId,
         es_canje: 0,
@@ -91,10 +82,7 @@ cliente.post('/comprar', zValidator('json', CompraSchema), async c => {
     return c.json({ success: false, error: err.message }, 400);
   }
 });
-/**
- * POST /canjear
- * Resta 10 puntos por cada canje individual (1 por 1).
- */
+
 cliente.post('/canjear', zValidator('json', CanjeSchema), async c => {
   const { userId, idSabor } = c.req.valid('json');
 
@@ -110,14 +98,12 @@ cliente.post('/canjear', zValidator('json', CanjeSchema), async c => {
         throw new Error('Puntos insuficientes. Necesitas al menos 10 puntos.');
       }
 
-      // 1. Crear pedido de canje
       const [nuevoPedido] = await tx.insert(pedidos).values({
         id_usuario: userId,
         es_canje: 1,
         estado: 'canje',
       });
 
-      // 2. Registrar detalle (Precio 0)
       await tx.insert(detalle_pedidos).values({
         id_pedido: nuevoPedido.insertId,
         id_sabor: idSabor,
@@ -125,7 +111,6 @@ cliente.post('/canjear', zValidator('json', CanjeSchema), async c => {
         precio_unitario: '0.00',
       });
 
-      // 3. Restar 10 puntos del saldo acumulado
       await tx
         .update(usuarios)
         .set({
@@ -133,7 +118,6 @@ cliente.post('/canjear', zValidator('json', CanjeSchema), async c => {
         })
         .where(eq(usuarios.id_usuario, userId));
 
-      // 4. Descontar 1 unidad del stock
       await tx
         .update(sabores)
         .set({ stock: sql`COALESCE(${sabores.stock}, 0) - 1` })
@@ -146,9 +130,6 @@ cliente.post('/canjear', zValidator('json', CanjeSchema), async c => {
   }
 });
 
-/**
- * GET /historial/:userId
- */
 cliente.get('/historial/:userId', async c => {
   const userId = parseInt(c.req.param('userId'));
 
@@ -178,7 +159,6 @@ cliente.patch('/estado', zValidator('json', CambioEstadoSchema), async c => {
 
   try {
     const resultado = await db.transaction(async tx => {
-      // 1. Obtener el pedido actual para saber si ya estaba completado o si es canje
       const [pedido] = await tx
         .select()
         .from(pedidos)
@@ -187,20 +167,38 @@ cliente.patch('/estado', zValidator('json', CambioEstadoSchema), async c => {
       if (!pedido) throw new Error('Pedido no encontrado');
       if (!pedido.id_usuario) throw new Error('Pedido sin usuario asociado');
 
-      // Si ya estaba completado, no volvemos a sumar puntos para evitar duplicados
       if (pedido.estado === 'completado') {
         throw new Error('Este pedido ya fue completado anteriormente');
       }
 
-      // 2. Actualizar el estado del pedido
+      if (pedido.estado === 'cancelado') {
+        throw new Error('Este pedido ya está cancelado');
+      }
+
+      if (nuevoEstado === 'cancelado') {
+        const detalles = await tx
+          .select()
+          .from(detalle_pedidos)
+          .where(eq(detalle_pedidos.id_pedido, id_pedido));
+
+        for (const det of detalles) {
+          if (det.id_sabor && det.cantidad) {
+            await tx
+              .update(sabores)
+              .set({
+                stock: sql`COALESCE(${sabores.stock}, 0) + ${det.cantidad}`,
+              })
+              .where(eq(sabores.id_sabor, det.id_sabor));
+          }
+        }
+      }
+
       await tx
         .update(pedidos)
         .set({ estado: nuevoEstado })
         .where(eq(pedidos.id_pedido, id_pedido));
 
-      // 3. Lógica de Puntos: SOLO si el nuevo estado es 'completado' y NO es un canje
       if (nuevoEstado === 'completado' && pedido.es_canje === 0) {
-        // Sumamos todas las cantidades de los sabores en este pedido
         const detalles = await tx
           .select({ cantidad: detalle_pedidos.cantidad })
           .from(detalle_pedidos)
@@ -226,7 +224,13 @@ cliente.patch('/estado', zValidator('json', CambioEstadoSchema), async c => {
         }
       }
 
-      return { message: 'Estado actualizado correctamente', puntosSumados: 0 };
+      return {
+        message:
+          nuevoEstado === 'cancelado'
+            ? 'Pedido cancelado y stock restaurado'
+            : 'Estado actualizado correctamente',
+        puntosSumados: 0,
+      };
     });
 
     return c.json({ success: true, ...resultado });
@@ -239,7 +243,6 @@ cliente.get('/puntos/:userId', async c => {
   const userId = parseInt(c.req.param('userId'));
 
   try {
-    // 1. Obtener los puntos acumulados del usuario
     const [user] = await db
       .select({
         nombre: usuarios.nombre,
@@ -254,7 +257,6 @@ cliente.get('/puntos/:userId', async c => {
 
     const puntosActuales = user.puntos ?? 0;
 
-    // 2. Lógica de Negocio: 10 puntos = 1 canje
     const canjesDisponibles = Math.floor(puntosActuales / 10);
     const puntosParaSiguiente = 10 - (puntosActuales % 10);
 
@@ -275,15 +277,10 @@ cliente.get('/puntos/:userId', async c => {
   }
 });
 
-/**
- * GET /pedidos-agrupados/:userId
- * Retorna una lista de pedidos donde cada uno contiene su detalle interno.
- */
 cliente.get('/pedidos-agrupados/:userId', async c => {
   const userId = parseInt(c.req.param('userId'));
 
   try {
-    // 1. Obtenemos la data plana (Join)
     const rows = await db
       .select({
         id_pedido: pedidos.id_pedido,
@@ -304,13 +301,10 @@ cliente.get('/pedidos-agrupados/:userId', async c => {
       .where(eq(pedidos.id_usuario, userId))
       .orderBy(desc(pedidos.fecha_pedido));
 
-    // 2. Agrupamos los datos en una estructura anidada
     const resultado = rows.reduce((acc: any[], row) => {
-      // Buscamos si el pedido ya existe en nuestro acumulador
       let pedido = acc.find(p => p.id_pedido === row.id_pedido);
 
       if (!pedido) {
-        // Si no existe, creamos el objeto del pedido con el array de detalle vacío
         pedido = {
           id_pedido: row.id_pedido,
           fecha: row.fecha,
@@ -322,7 +316,6 @@ cliente.get('/pedidos-agrupados/:userId', async c => {
         acc.push(pedido);
       }
 
-      // Añadimos el sabor al array de detalle del pedido correspondiente
       pedido.detalle.push({
         sabor: row.sabor,
         cantidad: row.cantidad,
@@ -330,7 +323,6 @@ cliente.get('/pedidos-agrupados/:userId', async c => {
         subtotal: parseFloat(row.subtotal as string),
       });
 
-      // Sumamos al total del pedido
       pedido.total_pedido += parseFloat(row.subtotal as string);
 
       return acc;

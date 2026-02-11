@@ -24,7 +24,6 @@ app.post('/movimiento', zValidator('json', MovimientoSchema), async c => {
 
   try {
     const result = await db.transaction(async tx => {
-      // 1. Registrar movimiento
       const [movimiento] = await tx.insert(movimientos_stock).values({
         id_sabor: idSabor,
         cantidad: cantidad,
@@ -52,7 +51,6 @@ app.post('/movimiento', zValidator('json', MovimientoSchema), async c => {
 
 app.get('/', async c => {
   try {
-    // 1. Obtenemos la data plana (Join)
     const rows = await db
       .select({
         id_pedido: pedidos.id_pedido,
@@ -74,13 +72,10 @@ app.get('/', async c => {
       .innerJoin(usuarios, eq(pedidos.id_usuario, usuarios.id_usuario))
       .orderBy(desc(pedidos.fecha_pedido));
 
-    // 2. Agrupamos los datos en una estructura anidada
     const resultado = rows.reduce((acc: any[], row) => {
-      // Buscamos si el pedido ya existe en nuestro acumulador
       let pedido = acc.find(p => p.id_pedido === row.id_pedido);
 
       if (!pedido) {
-        // Si no existe, creamos el objeto del pedido con el array de detalle vacío
         pedido = {
           id_pedido: row.id_pedido,
           fecha: row.fecha,
@@ -93,7 +88,6 @@ app.get('/', async c => {
         acc.push(pedido);
       }
 
-      // Añadimos el sabor al array de detalle del pedido correspondiente
       pedido.detalle.push({
         sabor: row.sabor,
         cantidad: row.cantidad,
@@ -101,7 +95,6 @@ app.get('/', async c => {
         subtotal: parseFloat(row.subtotal as string),
       });
 
-      // Sumamos al total del pedido
       pedido.total_pedido += parseFloat(row.subtotal as string);
 
       return acc;

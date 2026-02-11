@@ -5,25 +5,23 @@ import {
   text,
   int,
   timestamp,
-  mysqlView,
-  double,
-  tinyint,
   mysqlEnum,
   decimal,
+  tinyint,
 } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
 
 export const usuarios = mysqlTable('usuarios', {
-  id_usuario: serial('id_usuario').primaryKey(),
+  id_usuario: int('id_usuario').primaryKey().autoincrement(),
   nombre: varchar('nombre', { length: 100 }).notNull(),
   correo: varchar('correo', { length: 100 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
   rol: mysqlEnum('rol', ['cliente', 'admin']).default('cliente'),
-  puntos_acumulados: int('puntos_acumulados').default(0), // Aquí contaremos los pedidos
+  puntos_acumulados: int('puntos_acumulados').default(0),
   fecha_registro: timestamp('fecha_registro').defaultNow(),
+  instrucciones_entrega: text('instrucciones_entrega'),
 });
 
-// 2. Sabores
 export const sabores = mysqlTable('sabores', {
   id_sabor: serial('id_sabor').primaryKey(),
   nombre: varchar('nombre', { length: 50 }).notNull().unique(),
@@ -31,7 +29,6 @@ export const sabores = mysqlTable('sabores', {
   stock: int('stock').default(0),
 });
 
-// 3. Pedidos (Cabecera)
 export const pedidos = mysqlTable('pedidos', {
   id_pedido: serial('id_pedido').primaryKey(),
   id_usuario: int('id_usuario').references(() => usuarios.id_usuario),
@@ -46,7 +43,6 @@ export const pedidos = mysqlTable('pedidos', {
   ]).default('pendiente'),
 });
 
-// 4. Detalle de Pedidos
 export const detalle_pedidos = mysqlTable('detalle_pedidos', {
   id_detalle: serial('id_detalle').primaryKey(),
   id_pedido: int('id_pedido').references(() => pedidos.id_pedido),

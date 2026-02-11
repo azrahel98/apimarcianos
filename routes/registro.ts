@@ -15,13 +15,13 @@ const RegistroSchema = z.object({
   contrasena: z
     .string({ error: 'Debe tener un campo llamado contrasena' })
     .min(2, { message: 'La contraseña debe tener al menos 2 caracteres' }),
+  instrucciones_entrega: z.string().optional(),
 });
 
 registro.post('/', zValidator('json', RegistroSchema), async c => {
   const body = c.req.valid('json');
 
   try {
-    // Verificar si el usuario ya existe
     const existe = await db
       .select()
       .from(usuarios)
@@ -32,11 +32,11 @@ registro.post('/', zValidator('json', RegistroSchema), async c => {
       return c.json({ message: 'El correo ya está registrado' }, 409);
     }
 
-    // Crear el usuario
     await db.insert(usuarios).values({
       nombre: body.nombre,
       correo: body.email,
-      password: body.contrasena, // En un entorno real, esto debería estar hasheado
+      password: body.contrasena,
+      instrucciones_entrega: body.instrucciones_entrega,
       rol: 'cliente',
     });
 

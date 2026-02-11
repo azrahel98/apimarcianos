@@ -1,7 +1,5 @@
-// socket.ts
 import { Context } from 'hono';
 
-// Usamos un Set para evitar duplicados y gestionar fácilmente las conexiones activas
 const clients = new Set<WebSocket>();
 
 export const handleWebSocket = (c: Context) => {
@@ -28,7 +26,6 @@ export const handleWebSocket = (c: Context) => {
   return response;
 };
 
-// Esta función la importarás en tus rutas (ej. pedidos.ts) para enviar la notificación
 export const notifyNewOrder = (pedido: any) => {
   const payload = JSON.stringify({
     event: 'order_created',
