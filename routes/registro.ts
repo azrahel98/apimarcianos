@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { zValidator } from './error.ts';
 import { usuarios } from '../db/schemas.ts';
 import { eq } from 'drizzle-orm';
-import { checkServerIdentity } from 'node:tls';
 
 const registro = new Hono();
 
@@ -16,7 +15,7 @@ const RegistroSchema = z.object({
   contrasena: z
     .string({ error: 'Debe tener un campo llamado contrasena' })
     .min(2, { message: 'La contraseña debe tener al menos 2 caracteres' }),
-  instrucciones_entrega: z.string(),
+  instrucciones_entrega: z.string().optional(),
 });
 
 registro.post('/', zValidator('json', RegistroSchema), async c => {
