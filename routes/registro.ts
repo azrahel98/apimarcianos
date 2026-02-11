@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { zValidator } from './error.ts';
 import { usuarios } from '../db/schemas.ts';
 import { eq } from 'drizzle-orm';
+import { checkServerIdentity } from 'node:tls';
 
 const registro = new Hono();
 
@@ -15,7 +16,7 @@ const RegistroSchema = z.object({
   contrasena: z
     .string({ error: 'Debe tener un campo llamado contrasena' })
     .min(2, { message: 'La contraseña debe tener al menos 2 caracteres' }),
-  instrucciones_entrega: z.string().optional(),
+  instrucciones_entrega: z.string(),
 });
 
 registro.post('/', zValidator('json', RegistroSchema), async c => {
@@ -32,6 +33,7 @@ registro.post('/', zValidator('json', RegistroSchema), async c => {
       return c.json({ message: 'El correo ya está registrado' }, 409);
     }
 
+    console.log(body);
     await db.insert(usuarios).values({
       nombre: body.nombre,
       correo: body.email,
