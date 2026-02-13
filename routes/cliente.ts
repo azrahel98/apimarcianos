@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { db } from '../db/mysql.ts';
 import { usuarios, pedidos, detalle_pedidos, sabores } from '../db/schemas.ts';
-import { eq, sql, desc } from 'drizzle-orm';
+import { eq, sql, desc, and, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { zValidator } from './error.ts';
 import { notifyNewOrder } from '../webscket/socket.ts';
@@ -38,6 +38,23 @@ cliente.post('/comprar', zValidator('json', CompraSchema), async c => {
   const { userId, productos } = c.req.valid('json');
 
   try {
+    const [pedidoPendiente] = await db
+      .select()
+      .from(pedidos)
+      .where(
+        and(
+          eq(pedidos.id_usuario, userId),
+          inArray(pedidos.estado, ['pendiente', 'porcobrar'])
+        )
+      )
+      .limit(1);
+
+    if (pedidoPendiente) {
+      throw new Error(
+        'Tienes un pedido en curso. Espere a que se complete o cancele el anterior.'
+      );
+    }
+
     const resultado = await db.transaction(async tx => {
       const [nuevoPedido] = await tx.insert(pedidos).values({
         id_usuario: userId,
