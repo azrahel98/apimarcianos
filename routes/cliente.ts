@@ -104,6 +104,23 @@ cliente.post('/canjear', zValidator('json', CanjeSchema), async c => {
   const { userId, idSabor } = c.req.valid('json');
 
   try {
+    const [pedidoPendiente] = await db
+      .select()
+      .from(pedidos)
+      .where(
+        and(
+          eq(pedidos.id_usuario, userId),
+          inArray(pedidos.estado, ['pendiente', 'porcobrar', 'canje'])
+        )
+      )
+      .limit(1);
+
+    if (pedidoPendiente) {
+      throw new Error(
+        'Tienes un pedido en curso. Espere a que se complete o cancele el anterior.'
+      );
+    }
+
     await db.transaction(async tx => {
       const [user] = await tx
         .select()
